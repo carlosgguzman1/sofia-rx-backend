@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Sofía RX — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--teal:#0F766E;--tealL:#14B8A6;--navy:#0F172A;--slate:#1E293B;--muted:#64748B;--border:#E2E8F0;--bg:#F7FBFA;--white:#fff;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--navy);}
+
+    /* NAV */
+    nav{background:var(--navy);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .logo{font-family:'Syne',sans-serif;color:#fff;font-size:18px;font-weight:800;}
+    .logo span{color:var(--tealL);}
+    .status-dot{display:flex;align-items:center;gap:8px;color:#94A3B8;font-size:13px;font-weight:600;}
+    .dot{width:8px;height:8px;background:#10B981;border-radius:50%;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+    /* STATS */
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:16px;}
+    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;}
+    .stat-card.alert{border-color:#FCA5A5;background:#FEF2F2;}
+    .stat-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--teal);}
+    .stat-card.alert .stat-num{color:#DC2626;}
+    .stat-label{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600;}
+
+    /* TABS */
+    .tabs{display:flex;gap:4px;padding:0 16px;border-bottom:2px solid var(--border);background:var(--white);overflow-x:auto;scrollbar-width:none;}
+    .tab{padding:12px 16px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:'DM Sans',sans-serif;}
+    .tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+
+    /* CARDS */
+    .content{padding:16px;max-width:900px;margin:0 auto;}
+    .card{background:var(--white);border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s;}
+    .card:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);}
+    .card-header{padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12;}
+    .card-body{padding:0 16px 16px;}
+    .badge{display:inline-block;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:800;letter-spacing:.5px;}
+    .badge.pendiente{background:#FEF3C7;color:#D97706;}
+    .badge.completado{background:#D1FAE5;color:#065F46;}
+    .badge.urgente{background:#FEE2E2;color:#991B1B;}
+    .patient-name{font-size:16px;font-weight:700;margin-bottom:4px;}
+    .detail{font-size:13px;color:var(--muted);line-height:1.6;}
+    .detail strong{color:var(--navy);font-weight:600;}
+    .time{font-size:12px;color:var(--muted);margin-top:6px;}
+
+    .complete-btn{background:var(--teal);color:#fff;border:none;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+    .complete-btn:hover{background:var(--tealL);transform:translateY(-1px);}
+    .complete-btn:disabled{background:#94A3B8;cursor:default;transform:none;}
+
+    .empty{text-align:center;padding:48px 24px;color:var(--muted);}
+    .empty-icon{font-size:48px;margin-bottom:12px;}
+    .empty h3{font-size:16px;font-weight:700;margin-bottom:6px;color:var(--navy);}
+
+    .refresh-btn{background:var(--teal);color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+    /* HISTORY */
+    .hist-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);}
+    .hist-item:last-child{border-bottom:none;}
+    .hist-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .hist-icon.refill{background:#D1FAE5;}
+    .hist-icon.verificacion{background:#DBEAFE;}
+    .hist-icon.mensaje{background:#FEF3C7;}
+    .hist-icon.farmaceutico{background:#FEE2E2;}
+    .hist-text{flex:1;min-width:0;}
+    .hist-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .hist-sub{font-size:12px;color:var(--muted);}
+    .hist-time{font-size:11px;color:var(--muted);white-space:nowrap;}
+
+    @media(max-width:600px){.stats{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Sofía <span>RX</span></div>
+  <div class="status-dot"><span class="dot"></span> Activo</div>
+  <button class="refresh-btn" onclick="loadAll()">↻ Actualizar</button>
+</nav>
+
+<div id="statsRow" class="stats">
+  <div class="stat-card"><div class="stat-num" id="s-refills">—</div><div class="stat-label">Refills Pendientes</div></div>
+  <div class="stat-card"><div class="stat-num" id="s-mensajes">—</div><div class="stat-label">Mensajes Pendientes</div></div>
+  <div class="stat-card"><div class="stat-num" id="s-recetas">—</div><div class="stat-label">Recetas Pendientes</div></div>
+  <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Llamadas</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('refills',this)">💊 Refills</button>
+  <button class="tab" onclick="switchTab('recetas',this)">🔍 Recetas</button>
+  <button class="tab" onclick="switchTab('mensajes',this)">💬 Mensajes</button>
+  <button class="tab" onclick="switchTab('historial',this)">📋 Historial</button>
+</div>
+
+<div class="content">
+  <div id="tab-refills"></div>
+  <div id="tab-recetas" style="display:none"></div>
+  <div id="tab-mensajes" style="display:none"></div>
+  <div id="tab-historial" style="display:none"></div>
+</div>
+
+<script>
+let currentTab = 'refills';
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['refills','recetas','mensajes','historial'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const d = await r.json();
+    document.getElementById('s-refills').textContent  = d.refills_pend;
+    document.getElementById('s-mensajes').textContent = d.mensajes_pend;
+    document.getElementById('s-recetas').textContent  = d.recetas_pend;
+    document.getElementById('s-total').textContent    = d.total_llamadas;
+    // Alert color if pending
+    document.querySelector('#statsRow .stat-card:nth-child(1)').className = 'stat-card' + (d.refills_pend > 0 ? ' alert' : '');
+  } catch(e) { console.error(e); }
+}
+
+async function completar(tipo, id, btn) {
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    await fetch(`/api/completar/${tipo}/${id}`, { method:'POST' });
+    btn.textContent = '✓ Listo';
+    btn.style.background = '#10B981';
+    const badge = btn.closest('.card').querySelector('.badge');
+    if(badge){ badge.className = 'badge completado'; badge.textContent = 'COMPLETADO'; }
+    loadStats();
+  } catch(e){ btn.disabled = false; btn.textContent = 'Completar'; }
+}
+
+function renderRefill(item) {
+  const done = item.estado === 'completado';
+  return `<div class="card">
+    <div class="card-header">
+      <div>
+        <div class="patient-name">💊 ${item.nombre_paciente}</div>
+        <span class="badge ${done ? 'completado' : 'pendiente'}">${done ? 'COMPLETADO' : 'PENDIENTE'}</span>
+      </div>
+      ${!done ? `<button class="complete-btn" onclick="completar('refill',${item.id},this)">Completar en RX30</button>` : ''}
+    </div>
+    <div class="card-body">
+      <div class="detail">
+        <strong>Fecha nac.:</strong> ${item.fecha_nacimiento || '—'}<br/>
+        <strong>Medicamento:</strong> ${item.medicamento || '—'}<br/>
+        ${item.cantidad ? `<strong>Cantidad:</strong> ${item.cantidad}<br/>` : ''}
+        ${item.notas ? `<strong>Notas:</strong> ${item.notas}` : ''}
+      </div>
+      <div class="time">⏰ ${item.timestamp}${done && item.completado_en ? ' · Completado ' + item.completado_en : ''}</div>
+    </div>
+  </div>`;
+}
+
+function renderReceta(item) {
+  const done = item.estado === 'completado';
+  return `<div class="card">
+    <div class="card-header">
+      <div>
+        <div class="patient-name">🔍 ${item.nombre_paciente}</div>
+        <span class="badge ${done ? 'completado' : 'pendiente'}">${done ? 'COMPLETADO' : 'PENDIENTE'}</span>
+      </div>
+      ${!done ? `<button class="complete-btn" onclick="completar('receta',${item.id},this)">Verificado</button>` : ''}
+    </div>
+    <div class="card-body">
+      <div class="detail">
+        <strong>Fecha nac.:</strong> ${item.fecha_nacimiento || '—'}<br/>
+        <strong>Medicamento:</strong> ${item.medicamento || '—'}
+      </div>
+      <div class="time">⏰ ${item.timestamp}</div>
+    </div>
+  </div>`;
+}
+
+function renderMensaje(item) {
+  const done = item.estado === 'completado';
+  const esUrg = item.urgencia === 'URGENTE';
+  return `<div class="card">
+    <div class="card-header">
+      <div>
+        <div class="patient-name">${item.tipo === 'farmaceutico' ? '👨‍⚕️' : '💬'} ${item.nombre_paciente}</div>
+        <span class="badge ${done ? 'completado' : esUrg ? 'urgente' : 'pendiente'}">${done ? 'ATENDIDO' : esUrg ? '🚨 URGENTE' : 'PENDIENTE'}</span>
+      </div>
+      ${!done ? `<button class="complete-btn" onclick="completar('${item.tipo === 'farmaceutico' ? 'farmaceutico' : 'mensaje'}',${item.id},this)">Atendido</button>` : ''}
+    </div>
+    <div class="card-body">
+      <div class="detail">
+        ${item.mensaje ? `<strong>Mensaje:</strong> ${item.mensaje}<br/>` : ''}
+        ${item.motivo  ? `<strong>Motivo:</strong> ${item.motivo}<br/>`   : ''}
+        ${item.telefono ? `<strong>Teléfono:</strong> ${item.telefono}` : ''}
+      </div>
+      <div class="time">⏰ ${item.timestamp}</div>
+    </div>
+  </div>`;
+}
+
+function histIcon(tipo) {
+  const map = { refill:'💊', verificacion:'🔍', mensaje:'💬', farmaceutico:'👨‍⚕️' };
+  return map[tipo] || '📞';
+}
+
+function renderHistorial(items) {
+  if(!items.length) return emptyState('Sin llamadas aún','Las llamadas aparecerán aquí.');
+  return `<div class="card">${items.map(i => `
+    <div class="hist-item">
+      <div class="hist-icon ${i.tipo}">${histIcon(i.tipo)}</div>
+      <div class="hist-text">
+        <div class="hist-name">${i.nombre_paciente || 'Desconocido'}</div>
+        <div class="hist-sub">${i.tipo === 'refill' ? i.medicamento : i.tipo === 'verificacion' ? 'Verificación: '+i.medicamento : i.tipo === 'farmaceutico' ? i.motivo : i.mensaje || ''}</div>
+      </div>
+      <div>
+        <div class="hist-time">${i.timestamp}</div>
+        <span class="badge ${i.estado === 'completado' ? 'completado' : 'pendiente'}" style="font-size:10px">${i.estado.toUpperCase()}</span>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function emptyState(title, sub) {
+  return `<div class="empty"><div class="empty-icon">✅</div><h3>${title}</h3><p>${sub}</p></div>`;
+}
+
+async function loadAll() {
+  await loadStats();
+
+  const [refills, recetas, mensajes, llamadas] = await Promise.all([
+    fetch('/api/refills').then(r=>r.json()),
+    fetch('/api/recetas').then(r=>r.json()),
+    fetch('/api/mensajes').then(r=>r.json()),
+    fetch('/api/llamadas').then(r=>r.json()),
+  ]);
+
+  const pend_r = refills.filter(r=>r.estado==='pendiente');
+  const comp_r = refills.filter(r=>r.estado==='completado');
+  document.getElementById('tab-refills').innerHTML =
+    (pend_r.length ? `<div style="font-size:12px;font-weight:700;color:#D97706;margin-bottom:8px;padding-left:4px;">⏳ PENDIENTES (${pend_r.length})</div>` + pend_r.map(renderRefill).join('') : '') +
+    (comp_r.length ? `<div style="font-size:12px;font-weight:700;color:#065F46;margin:16px 0 8px;padding-left:4px;">✅ COMPLETADOS (${comp_r.length})</div>` + comp_r.map(renderRefill).join('') : '') +
+    (!refills.length ? emptyState('Sin refills','Los refills de Sofía aparecerán aquí en tiempo real.') : '');
+
+  document.getElementById('tab-recetas').innerHTML =
+    (!recetas.length ? emptyState('Sin verificaciones','Las solicitudes de verificación aparecerán aquí.') : recetas.map(renderReceta).join(''));
+
+  document.getElementById('tab-mensajes').innerHTML =
+    (!mensajes.length ? emptyState('Sin mensajes','Los mensajes y solicitudes al farmacéutico aparecerán aquí.') : mensajes.map(renderMensaje).join(''));
+
+  document.getElementById('tab-historial').innerHTML = renderHistorial(llamadas);
+}
+
+// Auto-refresh cada 20 segundos
+loadAll();
+setInterval(loadAll, 20000);
+</script>
+</body>
+</html>
