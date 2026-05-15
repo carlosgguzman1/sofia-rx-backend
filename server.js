@@ -64,7 +64,9 @@ console.log("[TOOLCALLS]", JSON.stringify(req.body?.message?.toolCallList || req
   const results = [];
 
   for (const toolCall of toolCallList) {
-    const { id, name, arguments: args } = toolCall;
+    const id = toolCall.id;
+const name = toolCall.name || toolCall.function?.name;
+const args = toolCall.arguments || toolCall.function?.arguments || {};
     let result = "OK";
 
     // ── guardar_refill ──
