@@ -50,7 +50,7 @@ function timestamp() {
 // ─── VAPI WEBHOOK ──────────────────────────────────────────────────
 // Vapi llama a POST /webhook cuando el AI activa un tool
 app.post("/webhook", async (req, res) => {
-  console.log("[Webhook recibido]", JSON.stringify(req.body, null, 2));
+  console.log("[Webhook recibido] tool:", req.body?.message?.toolCallList?.[0]?.name);
 
   // Vapi tool-calls format
   const toolCallList = req.body?.message?.toolCallList || [];
