@@ -3,94 +3,133 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Sofía RX — Dashboard</title>
+  <title>Sofía RX — Dashboard Técnico</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    :root{--teal:#0F766E;--tealL:#14B8A6;--navy:#0F172A;--slate:#1E293B;--muted:#64748B;--border:#E2E8F0;--bg:#F7FBFA;--white:#fff;}
+    :root{
+      --teal:#0F766E;--tealL:#14B8A6;--tealD:#0A5B55;
+      --navy:#0F172A;--slate:#1E293B;
+      --muted:#64748B;--border:#E2E8F0;--bg:#F0FDF9;--white:#fff;
+      --red:#DC2626;--yellow:#D97706;--green:#059669;
+    }
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--navy);}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;}
 
-    /* NAV */
-    nav{background:var(--navy);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-    .logo{font-family:'Syne',sans-serif;color:#fff;font-size:18px;font-weight:800;}
+    nav{background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:8px;}
+    .logo{font-family:'Syne',sans-serif;color:#fff;font-size:18px;font-weight:800;flex-shrink:0;}
     .logo span{color:var(--tealL);}
-    .status-dot{display:flex;align-items:center;gap:8px;color:#94A3B8;font-size:13px;font-weight:600;}
-    .dot{width:8px;height:8px;background:#10B981;border-radius:50%;animation:pulse 2s infinite;}
+    .nav-right{display:flex;align-items:center;gap:8px;}
+    .status-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);color:#94A3B8;font-size:12px;font-weight:600;padding:6px 12px;border-radius:100px;}
+    .dot{width:7px;height:7px;background:#10B981;border-radius:50%;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+    .refresh-btn{background:var(--teal);color:#fff;border:none;padding:7px 14px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
+    .refresh-btn:hover{background:var(--tealL);}
 
-    /* STATS */
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:16px;}
-    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;}
-    .stat-card.alert{border-color:#FCA5A5;background:#FEF2F2;}
-    .stat-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--teal);}
-    .stat-card.alert .stat-num{color:#DC2626;}
-    .stat-label{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600;}
+    .search-bar{padding:12px 16px;background:var(--white);border-bottom:1px solid var(--border);}
+    .search-input{width:100%;padding:10px 16px;border:1px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--navy);background:#F8FAFC;outline:none;transition:border .2s;}
+    .search-input:focus{border-color:var(--tealL);background:#fff;}
 
-    /* TABS */
-    .tabs{display:flex;gap:4px;padding:0 16px;border-bottom:2px solid var(--border);background:var(--white);overflow-x:auto;scrollbar-width:none;}
-    .tab{padding:12px 16px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:'DM Sans',sans-serif;}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 16px;}
+    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;transition:all .2s;}
+    .stat-card.urgent{border-color:#FCA5A5;background:#FEF2F2;animation:urgentPulse 2s infinite;}
+    @keyframes urgentPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.2);}50%{box-shadow:0 0 0 6px rgba(220,38,38,0);}}
+    .stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--teal);}
+    .stat-card.urgent .stat-num{color:var(--red);}
+    .stat-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;line-height:1.3;}
+
+    .tabs{display:flex;background:var(--white);border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none;padding:0 16px;}
+    .tab{padding:12px 14px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:'DM Sans',sans-serif;position:relative;}
     .tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+    .tab-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:800;margin-left:6px;background:var(--red);color:#fff;}
 
-    /* CARDS */
-    .content{padding:16px;max-width:900px;margin:0 auto;}
-    .card{background:var(--white);border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow:hidden;transition:box-shadow .2s;}
+    .content{padding:12px 16px;max-width:960px;margin:0 auto;}
+    .section-hdr{font-size:11px;font-weight:800;letter-spacing:1px;padding:6px 0;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+    .section-hdr.pendiente{color:var(--yellow);}
+    .section-hdr.completado{color:var(--green);}
+
+    .card{background:var(--white);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all .2s;animation:slideIn .3s ease;}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
     .card:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);}
-    .card-header{padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12;}
-    .card-body{padding:0 16px 16px;}
-    .badge{display:inline-block;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:800;letter-spacing:.5px;}
+    .card.urgente-card{border-color:var(--red);border-width:2px;}
+
+    .card-top{padding:14px 16px;display:flex;align-items:flex-start;gap:12;}
+    .card-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .card-icon.refill{background:#D1FAE5;}
+    .card-icon.verificacion{background:#DBEAFE;}
+    .card-icon.mensaje{background:#FEF3C7;}
+    .card-icon.farmaceutico{background:#FEE2E2;}
+
+    .card-main{flex:1;min-width:0;}
+    .patient-name{font-size:16px;font-weight:800;margin-bottom:4px;}
+    .badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+    .badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:800;letter-spacing:.5px;}
     .badge.pendiente{background:#FEF3C7;color:#D97706;}
     .badge.completado{background:#D1FAE5;color:#065F46;}
     .badge.urgente{background:#FEE2E2;color:#991B1B;}
-    .patient-name{font-size:16px;font-weight:700;margin-bottom:4px;}
-    .detail{font-size:13px;color:var(--muted);line-height:1.6;}
-    .detail strong{color:var(--navy);font-weight:600;}
-    .time{font-size:12px;color:var(--muted);margin-top:6px;}
+    .badge.timer{background:#F1F5F9;color:#475569;}
+    .badge.timer.late{background:#FEF3C7;color:#D97706;}
+    .badge.timer.very-late{background:#FEE2E2;color:#DC2626;}
 
-    .complete-btn{background:var(--teal);color:#fff;border:none;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
-    .complete-btn:hover{background:var(--tealL);transform:translateY(-1px);}
-    .complete-btn:disabled{background:#94A3B8;cursor:default;transform:none;}
+    .card-detail{font-size:13px;color:var(--muted);line-height:1.7;}
+    .card-detail strong{color:var(--navy);font-weight:600;}
+    .card-time{font-size:11px;color:var(--muted);margin-top:6px;}
+
+    .card-actions{padding:0 16px 14px;display:flex;gap:8px;flex-wrap:wrap;}
+    .complete-btn{background:var(--teal);color:#fff;border:none;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+    .complete-btn:hover{background:var(--tealL);}
+    .complete-btn:disabled{background:#94A3B8;cursor:default;}
+    .notes-input{flex:1;min-width:0;padding:8px 14px;border:1px solid var(--border);border-radius:100px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--navy);outline:none;transition:border .2s;}
+    .notes-input:focus{border-color:var(--tealL);}
 
     .empty{text-align:center;padding:48px 24px;color:var(--muted);}
     .empty-icon{font-size:48px;margin-bottom:12px;}
     .empty h3{font-size:16px;font-weight:700;margin-bottom:6px;color:var(--navy);}
 
-    .refresh-btn{background:var(--teal);color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
-
-    /* HISTORY */
-    .hist-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);}
+    .hist-list{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+    .hist-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;}
     .hist-item:last-child{border-bottom:none;}
-    .hist-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-    .hist-icon.refill{background:#D1FAE5;}
-    .hist-icon.verificacion{background:#DBEAFE;}
-    .hist-icon.mensaje{background:#FEF3C7;}
-    .hist-icon.farmaceutico{background:#FEE2E2;}
+    .hist-item:hover{background:#F8FAFC;}
+    .hist-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
     .hist-text{flex:1;min-width:0;}
-    .hist-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .hist-sub{font-size:12px;color:var(--muted);}
-    .hist-time{font-size:11px;color:var(--muted);white-space:nowrap;}
+    .hist-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .hist-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+    .hist-right{text-align:right;flex-shrink:0;}
+    .hist-time{font-size:11px;color:var(--muted);}
 
-    @media(max-width:600px){.stats{grid-template-columns:1fr 1fr;}}
+    .toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--navy);color:#fff;padding:14px 20px;border-radius:14px;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.25);transform:translateY(100px);opacity:0;transition:all .4s;max-width:300px;line-height:1.4;}
+    .toast.show{transform:none;opacity:1;}
+
+    @media(max-width:600px){
+      .stats{grid-template-columns:1fr 1fr;}
+      .stat-num{font-size:22px;}
+    }
   </style>
 </head>
 <body>
 
 <nav>
   <div class="logo">Sofía <span>RX</span></div>
-  <div class="status-dot"><span class="dot"></span> Activo</div>
-  <button class="refresh-btn" onclick="loadAll()">↻ Actualizar</button>
+  <div class="nav-right">
+    <div class="status-pill"><span class="dot"></span> <span id="countdown">20s</span></div>
+    <button class="refresh-btn" onclick="loadAll()">↻ Ahora</button>
+  </div>
 </nav>
 
-<div id="statsRow" class="stats">
-  <div class="stat-card"><div class="stat-num" id="s-refills">—</div><div class="stat-label">Refills Pendientes</div></div>
-  <div class="stat-card"><div class="stat-num" id="s-mensajes">—</div><div class="stat-label">Mensajes Pendientes</div></div>
-  <div class="stat-card"><div class="stat-num" id="s-recetas">—</div><div class="stat-label">Recetas Pendientes</div></div>
-  <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Llamadas</div></div>
+<div class="search-bar">
+  <input class="search-input" id="searchInput" placeholder="🔍 Buscar por nombre de paciente..." oninput="filterCards()"/>
+</div>
+
+<div class="stats">
+  <div class="stat-card" id="sc-refills"><div class="stat-num" id="s-refills">—</div><div class="stat-label">Refills<br/>Pendientes</div></div>
+  <div class="stat-card" id="sc-mensajes"><div class="stat-num" id="s-mensajes">—</div><div class="stat-label">Mensajes<br/>Pendientes</div></div>
+  <div class="stat-card" id="sc-recetas"><div class="stat-num" id="s-recetas">—</div><div class="stat-label">Recetas<br/>Pendientes</div></div>
+  <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total<br/>Llamadas</div></div>
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('refills',this)">💊 Refills</button>
-  <button class="tab" onclick="switchTab('recetas',this)">🔍 Recetas</button>
-  <button class="tab" onclick="switchTab('mensajes',this)">💬 Mensajes</button>
+  <button class="tab active" onclick="switchTab('refills',this)">💊 Refills <span class="tab-badge" id="badge-refills" style="display:none">0</span></button>
+  <button class="tab" onclick="switchTab('recetas',this)">🔍 Recetas <span class="tab-badge" id="badge-recetas" style="display:none">0</span></button>
+  <button class="tab" onclick="switchTab('mensajes',this)">💬 Mensajes <span class="tab-badge" id="badge-mensajes" style="display:none">0</span></button>
   <button class="tab" onclick="switchTab('historial',this)">📋 Historial</button>
 </div>
 
@@ -101,11 +140,45 @@
   <div id="tab-historial" style="display:none"></div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-let currentTab = 'refills';
+let prevCounts = {refills:-1, mensajes:-1, recetas:-1};
+let countdown = 20;
+let timer;
+
+function startTimer() {
+  clearInterval(timer);
+  countdown = 20;
+  timer = setInterval(() => {
+    countdown--;
+    document.getElementById('countdown').textContent = countdown + 's';
+    if (countdown <= 0) loadAll();
+  }, 1000);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function playSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.setValueAtTime(1100, ctx.currentTime + 0.15);
+    g.gain.setValueAtTime(0.3, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    o.start(); o.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
+}
 
 function switchTab(tab, btn) {
-  currentTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   ['refills','recetas','mensajes','historial'].forEach(t => {
@@ -113,150 +186,147 @@ function switchTab(tab, btn) {
   });
 }
 
-async function loadStats() {
-  try {
-    const r = await fetch('/api/stats');
-    const d = await r.json();
-    document.getElementById('s-refills').textContent  = d.refills_pend;
-    document.getElementById('s-mensajes').textContent = d.mensajes_pend;
-    document.getElementById('s-recetas').textContent  = d.recetas_pend;
-    document.getElementById('s-total').textContent    = d.total_llamadas;
-    // Alert color if pending
-    document.querySelector('#statsRow .stat-card:nth-child(1)').className = 'stat-card' + (d.refills_pend > 0 ? ' alert' : '');
-  } catch(e) { console.error(e); }
+function timeSince(ts) {
+  const m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 1) return 'Ahora mismo';
+  if (m < 60) return m + ' min';
+  return Math.floor(m/60) + 'h ' + (m%60) + 'm';
+}
+
+function timerBadge(ts) {
+  const m = Math.floor((Date.now() - ts) / 60000);
+  const cls = m > 30 ? 'very-late' : m > 10 ? 'late' : '';
+  return `<span class="badge timer ${cls}">⏱ ${timeSince(ts)}</span>`;
+}
+
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.card').forEach(c => {
+    c.style.display = (c.dataset.name||'').includes(q) ? '' : 'none';
+  });
 }
 
 async function completar(tipo, id, btn) {
-  btn.disabled = true;
-  btn.textContent = '...';
+  const ni = document.getElementById('n-'+tipo+'-'+id);
+  btn.disabled = true; btn.textContent = '...';
   try {
-    await fetch(`/api/completar/${tipo}/${id}`, { method:'POST' });
+    await fetch('/api/completar/'+tipo+'/'+id, {method:'POST'});
     btn.textContent = '✓ Listo';
     btn.style.background = '#10B981';
-    const badge = btn.closest('.card').querySelector('.badge');
-    if(badge){ badge.className = 'badge completado'; badge.textContent = 'COMPLETADO'; }
-    loadStats();
-  } catch(e){ btn.disabled = false; btn.textContent = 'Completar'; }
+    showToast('✅ Completado exitosamente');
+    setTimeout(loadAll, 800);
+  } catch(e) { btn.disabled = false; btn.textContent = 'Completar en RX30'; }
 }
 
-function renderRefill(item) {
+function card(item, tipo) {
   const done = item.estado === 'completado';
-  return `<div class="card">
-    <div class="card-header">
-      <div>
-        <div class="patient-name">💊 ${item.nombre_paciente}</div>
-        <span class="badge ${done ? 'completado' : 'pendiente'}">${done ? 'COMPLETADO' : 'PENDIENTE'}</span>
+  const urg = item.urgencia === 'URGENTE';
+  const icons = {refill:'💊',verificacion:'🔍',mensaje:'💬',farmaceutico:'👨‍⚕️'};
+  const t = item.tipo || tipo;
+  return `<div class="card ${urg&&!done?'urgente-card':''}" data-name="${(item.nombre_paciente||'').toLowerCase()}">
+    <div class="card-top">
+      <div class="card-icon ${t}">${icons[t]||'📞'}</div>
+      <div class="card-main">
+        <div class="patient-name">${item.nombre_paciente||'Sin nombre'}</div>
+        <div class="badges">
+          ${done?'<span class="badge completado">✓ COMPLETADO</span>':urg?'<span class="badge urgente">🚨 URGENTE</span>':'<span class="badge pendiente">PENDIENTE</span>'}
+          ${!done&&item.ts_raw?timerBadge(item.ts_raw):''}
+        </div>
+        <div class="card-detail">
+          ${item.fecha_nacimiento?`<strong>Fecha nac.:</strong> ${item.fecha_nacimiento}<br/>`:''}
+          ${item.medicamento?`<strong>Medicamento:</strong> ${item.medicamento}<br/>`:''}
+          ${item.cantidad?`<strong>Cantidad:</strong> ${item.cantidad}<br/>`:''}
+          ${item.mensaje?`<strong>Mensaje:</strong> ${item.mensaje}<br/>`:''}
+          ${item.motivo?`<strong>Motivo:</strong> ${item.motivo}<br/>`:''}
+          ${item.telefono?`<strong>Tel:</strong> <a href="tel:${item.telefono}" style="color:var(--teal);font-weight:600">${item.telefono}</a><br/>`:''}
+        </div>
+        <div class="card-time">⏰ ${item.timestamp}${done&&item.completado_en?' · Completado '+item.completado_en:''}</div>
       </div>
-      ${!done ? `<button class="complete-btn" onclick="completar('refill',${item.id},this)">Completar en RX30</button>` : ''}
     </div>
-    <div class="card-body">
-      <div class="detail">
-        <strong>Fecha nac.:</strong> ${item.fecha_nacimiento || '—'}<br/>
-        <strong>Medicamento:</strong> ${item.medicamento || '—'}<br/>
-        ${item.cantidad ? `<strong>Cantidad:</strong> ${item.cantidad}<br/>` : ''}
-        ${item.notas ? `<strong>Notas:</strong> ${item.notas}` : ''}
-      </div>
-      <div class="time">⏰ ${item.timestamp}${done && item.completado_en ? ' · Completado ' + item.completado_en : ''}</div>
-    </div>
+    ${!done?`<div class="card-actions">
+      <input class="notes-input" id="n-${t}-${item.id}" placeholder="Notas para RX30 (opcional)"/>
+      <button class="complete-btn" onclick="completar('${t}',${item.id},this)">✓ Completar en RX30</button>
+    </div>`:''}
   </div>`;
 }
 
-function renderReceta(item) {
-  const done = item.estado === 'completado';
-  return `<div class="card">
-    <div class="card-header">
-      <div>
-        <div class="patient-name">🔍 ${item.nombre_paciente}</div>
-        <span class="badge ${done ? 'completado' : 'pendiente'}">${done ? 'COMPLETADO' : 'PENDIENTE'}</span>
-      </div>
-      ${!done ? `<button class="complete-btn" onclick="completar('receta',${item.id},this)">Verificado</button>` : ''}
-    </div>
-    <div class="card-body">
-      <div class="detail">
-        <strong>Fecha nac.:</strong> ${item.fecha_nacimiento || '—'}<br/>
-        <strong>Medicamento:</strong> ${item.medicamento || '—'}
-      </div>
-      <div class="time">⏰ ${item.timestamp}</div>
-    </div>
-  </div>`;
-}
-
-function renderMensaje(item) {
-  const done = item.estado === 'completado';
-  const esUrg = item.urgencia === 'URGENTE';
-  return `<div class="card">
-    <div class="card-header">
-      <div>
-        <div class="patient-name">${item.tipo === 'farmaceutico' ? '👨‍⚕️' : '💬'} ${item.nombre_paciente}</div>
-        <span class="badge ${done ? 'completado' : esUrg ? 'urgente' : 'pendiente'}">${done ? 'ATENDIDO' : esUrg ? '🚨 URGENTE' : 'PENDIENTE'}</span>
-      </div>
-      ${!done ? `<button class="complete-btn" onclick="completar('${item.tipo === 'farmaceutico' ? 'farmaceutico' : 'mensaje'}',${item.id},this)">Atendido</button>` : ''}
-    </div>
-    <div class="card-body">
-      <div class="detail">
-        ${item.mensaje ? `<strong>Mensaje:</strong> ${item.mensaje}<br/>` : ''}
-        ${item.motivo  ? `<strong>Motivo:</strong> ${item.motivo}<br/>`   : ''}
-        ${item.telefono ? `<strong>Teléfono:</strong> ${item.telefono}` : ''}
-      </div>
-      <div class="time">⏰ ${item.timestamp}</div>
-    </div>
-  </div>`;
-}
-
-function histIcon(tipo) {
-  const map = { refill:'💊', verificacion:'🔍', mensaje:'💬', farmaceutico:'👨‍⚕️' };
-  return map[tipo] || '📞';
-}
-
-function renderHistorial(items) {
-  if(!items.length) return emptyState('Sin llamadas aún','Las llamadas aparecerán aquí.');
-  return `<div class="card">${items.map(i => `
+function historial(items) {
+  if(!items.length) return '<div class="empty"><div class="empty-icon">📋</div><h3>Sin historial</h3></div>';
+  const ic={refill:'💊',verificacion:'🔍',mensaje:'💬',farmaceutico:'👨‍⚕️'};
+  const bg={refill:'#D1FAE5',verificacion:'#DBEAFE',mensaje:'#FEF3C7',farmaceutico:'#FEE2E2'};
+  return `<div class="hist-list">${items.map(i=>`
     <div class="hist-item">
-      <div class="hist-icon ${i.tipo}">${histIcon(i.tipo)}</div>
+      <div class="hist-icon" style="background:${bg[i.tipo]||'#F1F5F9'}">${ic[i.tipo]||'📞'}</div>
       <div class="hist-text">
-        <div class="hist-name">${i.nombre_paciente || 'Desconocido'}</div>
-        <div class="hist-sub">${i.tipo === 'refill' ? i.medicamento : i.tipo === 'verificacion' ? 'Verificación: '+i.medicamento : i.tipo === 'farmaceutico' ? i.motivo : i.mensaje || ''}</div>
+        <div class="hist-name">${i.nombre_paciente||'Desconocido'}</div>
+        <div class="hist-sub">${i.tipo==='refill'?i.medicamento:i.tipo==='verificacion'?'Receta: '+i.medicamento:i.tipo==='farmaceutico'?i.motivo:i.mensaje||''}</div>
       </div>
-      <div>
+      <div class="hist-right">
         <div class="hist-time">${i.timestamp}</div>
-        <span class="badge ${i.estado === 'completado' ? 'completado' : 'pendiente'}" style="font-size:10px">${i.estado.toUpperCase()}</span>
+        <span class="badge ${i.estado==='completado'?'completado':'pendiente'}" style="font-size:9px;margin-top:4px;display:inline-block">${i.estado.toUpperCase()}</span>
       </div>
     </div>`).join('')}</div>`;
 }
 
-function emptyState(title, sub) {
+function empty(title, sub) {
   return `<div class="empty"><div class="empty-icon">✅</div><h3>${title}</h3><p>${sub}</p></div>`;
 }
 
-async function loadAll() {
-  await loadStats();
-
-  const [refills, recetas, mensajes, llamadas] = await Promise.all([
-    fetch('/api/refills').then(r=>r.json()),
-    fetch('/api/recetas').then(r=>r.json()),
-    fetch('/api/mensajes').then(r=>r.json()),
-    fetch('/api/llamadas').then(r=>r.json()),
-  ]);
-
-  const pend_r = refills.filter(r=>r.estado==='pendiente');
-  const comp_r = refills.filter(r=>r.estado==='completado');
-  document.getElementById('tab-refills').innerHTML =
-    (pend_r.length ? `<div style="font-size:12px;font-weight:700;color:#D97706;margin-bottom:8px;padding-left:4px;">⏳ PENDIENTES (${pend_r.length})</div>` + pend_r.map(renderRefill).join('') : '') +
-    (comp_r.length ? `<div style="font-size:12px;font-weight:700;color:#065F46;margin:16px 0 8px;padding-left:4px;">✅ COMPLETADOS (${comp_r.length})</div>` + comp_r.map(renderRefill).join('') : '') +
-    (!refills.length ? emptyState('Sin refills','Los refills de Sofía aparecerán aquí en tiempo real.') : '');
-
-  document.getElementById('tab-recetas').innerHTML =
-    (!recetas.length ? emptyState('Sin verificaciones','Las solicitudes de verificación aparecerán aquí.') : recetas.map(renderReceta).join(''));
-
-  document.getElementById('tab-mensajes').innerHTML =
-    (!mensajes.length ? emptyState('Sin mensajes','Los mensajes y solicitudes al farmacéutico aparecerán aquí.') : mensajes.map(renderMensaje).join(''));
-
-  document.getElementById('tab-historial').innerHTML = renderHistorial(llamadas);
+function section(label, cls, items, tipo) {
+  if (!items.length) return '';
+  return `<div class="section-hdr ${cls}">${label} (${items.length})</div>` + items.map(i=>card(i,tipo)).join('');
 }
 
-// Auto-refresh cada 20 segundos
+async function loadAll() {
+  startTimer();
+  try {
+    const [stats,refills,recetas,mensajes,llamadas] = await Promise.all([
+      fetch('/api/stats').then(r=>r.json()),
+      fetch('/api/refills').then(r=>r.json()),
+      fetch('/api/recetas').then(r=>r.json()),
+      fetch('/api/mensajes').then(r=>r.json()),
+      fetch('/api/llamadas').then(r=>r.json()),
+    ]);
+
+    document.getElementById('s-refills').textContent = stats.refills_pend;
+    document.getElementById('s-mensajes').textContent = stats.mensajes_pend;
+    document.getElementById('s-recetas').textContent = stats.recetas_pend;
+    document.getElementById('s-total').textContent = stats.total_llamadas;
+
+    document.getElementById('sc-refills').className = 'stat-card'+(stats.refills_pend>0?' urgent':'');
+    document.getElementById('sc-mensajes').className = 'stat-card'+(stats.mensajes_pend>0?' urgent':'');
+    document.getElementById('sc-recetas').className = 'stat-card'+(stats.recetas_pend>0?' urgent':'');
+
+    const badge = (id, n) => { const b=document.getElementById('badge-'+id); b.style.display=n>0?'inline-flex':'none'; b.textContent=n; };
+    badge('refills', stats.refills_pend);
+    badge('mensajes', stats.mensajes_pend);
+    badge('recetas', stats.recetas_pend);
+
+    if (prevCounts.refills >= 0 && stats.refills_pend > prevCounts.refills) { playSound(); showToast('🔔 Nuevo refill recibido'); }
+    if (prevCounts.mensajes >= 0 && stats.mensajes_pend > prevCounts.mensajes) { playSound(); showToast('💬 Nuevo mensaje recibido'); }
+    prevCounts = {refills:stats.refills_pend, mensajes:stats.mensajes_pend, recetas:stats.recetas_pend};
+
+    const pr = refills.filter(r=>r.estado==='pendiente'), cr = refills.filter(r=>r.estado==='completado');
+    document.getElementById('tab-refills').innerHTML = refills.length ?
+      section('⏳ PENDIENTES','pendiente',pr,'refill') + section('✅ COMPLETADOS','completado',cr,'refill') :
+      empty('Sin refills','Los refills de Sofía aparecerán aquí.');
+
+    const prec = recetas.filter(r=>r.estado==='pendiente'), crec = recetas.filter(r=>r.estado==='completado');
+    document.getElementById('tab-recetas').innerHTML = recetas.length ?
+      section('⏳ PENDIENTES','pendiente',prec,'verificacion') + section('✅ COMPLETADOS','completado',crec,'verificacion') :
+      empty('Sin verificaciones','Las solicitudes aparecerán aquí.');
+
+    const pm = mensajes.filter(m=>m.estado==='pendiente'), cm = mensajes.filter(m=>m.estado==='completado');
+    document.getElementById('tab-mensajes').innerHTML = mensajes.length ?
+      section('⏳ PENDIENTES','pendiente',pm,'mensaje') + section('✅ COMPLETADOS','completado',cm,'mensaje') :
+      empty('Sin mensajes','Los mensajes aparecerán aquí.');
+
+    document.getElementById('tab-historial').innerHTML = historial(llamadas.slice(0,50));
+    filterCards();
+  } catch(e) { console.error(e); }
+}
+
 loadAll();
-setInterval(loadAll, 20000);
 </script>
 </body>
 </html>
