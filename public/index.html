@@ -1,332 +1,660 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Sofía RX — Dashboard Técnico</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <style>
-    :root{
-      --teal:#0F766E;--tealL:#14B8A6;--tealD:#0A5B55;
-      --navy:#0F172A;--slate:#1E293B;
-      --muted:#64748B;--border:#E2E8F0;--bg:#F0FDF9;--white:#fff;
-      --red:#DC2626;--yellow:#D97706;--green:#059669;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<script src="config.js"></script>
+<title>Sofía RX — Dashboard del técnico</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Instrument+Serif&amp;display=swap">
+<style>
+/* Concepto: panel de mostrador. Resumen arriba, cola de pendientes a la izquierda, detalle de la llamada a la derecha. */
+:root {
+  --bg: #F3F7F6;
+  --surface: #FFFFFF;
+  --surface-2: #F7FAF9;
+  --ink: #0E2A2E;
+  --muted: #4A5D60;
+  --line: #D3E2DE;
+  --accent: #0B7A75;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E3F1EE;
+  --new-bg: #FDEBD8;
+  --new-fg: #8F3F0B;
+  --prog-bg: #E1EEF9;
+  --prog-fg: #0B4F8A;
+  --done-bg: #E1F3E8;
+  --done-fg: #17633D;
+  --urgent-bg: #FBE3DE;
+  --urgent-fg: #A32B1D;
+  --font-body: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Instrument Serif', Georgia, serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A1A1D;
+    --surface: #11272B;
+    --surface-2: #0E2125;
+    --ink: #E6F1EF;
+    --muted: #9FB6B3;
+    --line: #244045;
+    --accent: #3FB8A8;
+    --accent-ink: #06201F;
+    --accent-soft: #143538;
+    --new-bg: #3B2A19;
+    --new-fg: #F4B986;
+    --prog-bg: #162F48;
+    --prog-fg: #97C8F3;
+    --done-bg: #163A2A;
+    --done-fg: #8FD9AE;
+    --urgent-bg: #4A2420;
+    --urgent-fg: #F6A89C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0A1A1D;
+  --surface: #11272B;
+  --surface-2: #0E2125;
+  --ink: #E6F1EF;
+  --muted: #9FB6B3;
+  --line: #244045;
+  --accent: #3FB8A8;
+  --accent-ink: #06201F;
+  --accent-soft: #143538;
+  --new-bg: #3B2A19;
+  --new-fg: #F4B986;
+  --prog-bg: #162F48;
+  --prog-fg: #97C8F3;
+  --done-bg: #163A2A;
+  --done-fg: #8FD9AE;
+  --urgent-bg: #4A2420;
+  --urgent-fg: #F6A89C;
+  color-scheme: dark;
+}
 
-    nav{background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:8px;}
-    .logo{font-family:'Syne',sans-serif;color:#fff;font-size:18px;font-weight:800;flex-shrink:0;}
-    .logo span{color:var(--tealL);}
-    .nav-right{display:flex;align-items:center;gap:8px;}
-    .status-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);color:#94A3B8;font-size:12px;font-weight:600;padding:6px 12px;border-radius:100px;}
-    .dot{width:7px;height:7px;background:#10B981;border-radius:50%;animation:pulse 2s infinite;}
-    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-    .refresh-btn{background:var(--teal);color:#fff;border:none;padding:7px 14px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
-    .refresh-btn:hover{background:var(--tealL);}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.45 var(--font-body);
+}
+button, input { font: inherit; color: inherit; }
+.app { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-    .search-bar{padding:12px 16px;background:var(--white);border-bottom:1px solid var(--border);}
-    .search-input{width:100%;padding:10px 16px;border:1px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--navy);background:#F8FAFC;outline:none;transition:border .2s;}
-    .search-input:focus{border-color:var(--tealL);background:#fff;}
+/* Encabezado */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.brand { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; min-width: 0; }
+.logo { font-family: var(--font-display); font-size: 34px; line-height: 1; letter-spacing: 0.005em; }
+.sub { font-size: 14px; color: var(--muted); }
+.top-right { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--surface); }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--done-fg); }
+.chip.demo { background: var(--new-bg); color: var(--new-fg); border-color: transparent; }
+.clock { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); min-width: 72px; text-align: right; }
 
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 16px;}
-    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;transition:all .2s;}
-    .stat-card.urgent{border-color:#FCA5A5;background:#FEF2F2;animation:urgentPulse 2s infinite;}
-    @keyframes urgentPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.2);}50%{box-shadow:0 0 0 6px rgba(220,38,38,0);}}
-    .stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--teal);}
-    .stat-card.urgent .stat-num{color:var(--red);}
-    .stat-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;line-height:1.3;}
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; font-size: 14px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.small { min-height: 34px; padding: 0 12px; font-size: 13px; }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+:where(button, input, a):focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-    .tabs{display:flex;background:var(--white);border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none;padding:0 16px;}
-    .tab{padding:12px 14px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:'DM Sans',sans-serif;position:relative;}
-    .tab.active{color:var(--teal);border-bottom-color:var(--teal);}
-    .tab-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:800;margin-left:6px;background:var(--red);color:#fff;}
+/* Resumen */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(165px, 100%), 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.kpi .label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.kpi .num { font-size: 36px; line-height: 1.1; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi .hint { font-size: 13px; color: var(--muted); }
+.kpi.strong { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.kpi.strong .label, .kpi.strong .hint { color: var(--accent-ink); opacity: 0.85; }
 
-    .content{padding:12px 16px;max-width:960px;margin:0 auto;}
-    .section-hdr{font-size:11px;font-weight:800;letter-spacing:1px;padding:6px 0;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
-    .section-hdr.pendiente{color:var(--yellow);}
-    .section-hdr.completado{color:var(--green);}
+/* Cuerpo */
+.grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.toolbar { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); }
+.tab .n { margin-left: 6px; font-variant-numeric: tabular-nums; }
+.tab[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.tools input { flex: 1 1 200px; min-width: 0; min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); }
+.list { list-style: none; margin: 0; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 10px; border: 1px solid transparent; border-radius: 10px; background: transparent; cursor: pointer; text-align: left; }
+.row:hover { background: var(--surface-2); }
+.row[aria-current="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.row.fresh { animation: fresh 1.6s ease-out 1; }
+@keyframes fresh { from { background: var(--new-bg); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { .row.fresh { animation: none; } }
+.ico { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.line1 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.line1 strong { font-weight: 600; }
+.line2 { color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.time { flex: none; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.empty { padding: 28px 16px; text-align: center; color: var(--muted); }
 
-    .card{background:var(--white);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all .2s;animation:slideIn .3s ease;}
-    @keyframes slideIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
-    .card:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);}
-    .card.urgente-card{border-color:var(--red);border-width:2px;}
+.pill { display: inline-flex; align-items: center; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.6; }
+.st-new { background: var(--new-bg); color: var(--new-fg); }
+.st-progress { background: var(--prog-bg); color: var(--prog-fg); }
+.st-done { background: var(--done-bg); color: var(--done-fg); }
+.st-urgent { background: var(--urgent-bg); color: var(--urgent-fg); }
+.st-type { background: var(--accent-soft); color: var(--accent); }
 
-    .card-top{padding:14px 16px;display:flex;align-items:flex-start;gap:12;}
-    .card-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-    .card-icon.refill{background:#D1FAE5;}
-    .card-icon.verificacion{background:#DBEAFE;}
-    .card-icon.mensaje{background:#FEF3C7;}
-    .card-icon.farmaceutico{background:#FEE2E2;}
+/* Detalle */
+.detail { padding: 20px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 16px; }
+.detail h2 { margin: 0; font-size: 22px; line-height: 1.2; }
+.d-head { display: flex; flex-direction: column; gap: 8px; }
+.d-phone { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.d-phone b { color: var(--ink); font-weight: 600; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 12px; margin: 0; }
+.facts div { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.facts dt { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 2px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.sec-title { margin: 0 0 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.d-summary { margin: 0; }
+.chat { display: flex; flex-direction: column; gap: 6px; }
+.msg { max-width: 92%; padding: 8px 12px; border-radius: 12px; font-size: 14px; }
+.msg .who { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
+.msg.sofia { align-self: flex-start; background: var(--accent-soft); }
+.msg.pac { align-self: flex-end; background: var(--surface-2); border: 1px solid var(--line); }
+.alert { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.alert svg { color: var(--done-fg); flex: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; border-top: 1px solid var(--line); padding-top: 16px; }
 
-    .card-main{flex:1;min-width:0;}
-    .patient-name{font-size:16px;font-weight:800;margin-bottom:4px;}
-    .badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
-    .badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:800;letter-spacing:.5px;}
-    .badge.pendiente{background:#FEF3C7;color:#D97706;}
-    .badge.completado{background:#D1FAE5;color:#065F46;}
-    .badge.urgente{background:#FEE2E2;color:#991B1B;}
-    .badge.timer{background:#F1F5F9;color:#475569;}
-    .badge.timer.late{background:#FEF3C7;color:#D97706;}
-    .badge.timer.very-late{background:#FEE2E2;color:#DC2626;}
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; max-width: calc(100% - 32px); z-index: 20; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
 
-    .card-detail{font-size:13px;color:var(--muted);line-height:1.7;}
-    .card-detail strong{color:var(--navy);font-weight:600;}
-    .card-time{font-size:11px;color:var(--muted);margin-top:6px;}
-
-    .card-actions{padding:0 16px 14px;display:flex;gap:8px;flex-wrap:wrap;}
-    .complete-btn{background:var(--teal);color:#fff;border:none;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;flex-shrink:0;}
-    .complete-btn:hover{background:var(--tealL);}
-    .complete-btn:disabled{background:#94A3B8;cursor:default;}
-    .notes-input{flex:1;min-width:0;padding:8px 14px;border:1px solid var(--border);border-radius:100px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--navy);outline:none;transition:border .2s;}
-    .notes-input:focus{border-color:var(--tealL);}
-
-    .empty{text-align:center;padding:48px 24px;color:var(--muted);}
-    .empty-icon{font-size:48px;margin-bottom:12px;}
-    .empty h3{font-size:16px;font-weight:700;margin-bottom:6px;color:var(--navy);}
-
-    .hist-list{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
-    .hist-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;}
-    .hist-item:last-child{border-bottom:none;}
-    .hist-item:hover{background:#F8FAFC;}
-    .hist-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-    .hist-text{flex:1;min-width:0;}
-    .hist-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .hist-sub{font-size:12px;color:var(--muted);margin-top:2px;}
-    .hist-right{text-align:right;flex-shrink:0;}
-    .hist-time{font-size:11px;color:var(--muted);}
-
-    .toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--navy);color:#fff;padding:14px 20px;border-radius:14px;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.25);transform:translateY(100px);opacity:0;transition:all .4s;max-width:300px;line-height:1.4;}
-    .toast.show{transform:none;opacity:1;}
-
-    @media(max-width:600px){
-      .stats{grid-template-columns:1fr 1fr;}
-      .stat-num{font-size:22px;}
-    }
-  </style>
+@media (max-width: 900px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .detail { position: static; }
+  .clock { text-align: left; }
+}
+</style>
 </head>
 <body>
+<style>
+.login { max-width: 420px; margin: 12vh auto 0; padding: 28px; display: flex; flex-direction: column; gap: 14px; }
+.login h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 34px; }
+.login p { margin: 0; color: var(--muted); }
+.login input { min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); }
+.login .err { color: var(--urgent-fg); font-weight: 600; min-height: 1.4em; }
+[hidden] { display: none !important; }
+.chip.off { background: var(--urgent-bg); color: var(--urgent-fg); border-color: transparent; }
+.chip.off .dot { background: var(--urgent-fg); }
+.btn.link { border: none; background: none; color: var(--muted); min-height: 34px; padding: 0 8px; font-weight: 500; }
+</style>
 
-<nav>
-  <div class="logo">Sofía <span>RX</span></div>
-  <div class="nav-right">
-    <div class="status-pill"><span class="dot"></span> <span id="countdown">20s</span></div>
-    <button class="refresh-btn" onclick="loadAll()">↻ Ahora</button>
+<div class="app" id="app" hidden>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">Sofía RX</span>
+      <span class="sub" id="pharmacy">Dashboard del técnico</span>
+    </div>
+    <div class="top-right">
+      <span class="chip" id="conn"><span class="dot" aria-hidden="true"></span><span id="connText">Conectando…</span></span>
+      <span class="clock" id="clock"></span>
+      <button class="btn link" id="logout" type="button">Salir</button>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis" aria-label="Resumen del día"></section>
+
+  <div class="grid">
+    <section class="panel" aria-label="Cola de pendientes">
+      <div class="toolbar">
+        <div class="tabs" id="tabs"></div>
+        <div class="tools">
+          <label class="sr" for="q">Buscar por paciente, medicamento o receta</label>
+          <input id="q" type="search" placeholder="Buscar paciente, medicamento o receta" autocomplete="off">
+          <button class="btn small" id="hideDone" type="button" aria-pressed="false">Ocultar completados</button>
+        </div>
+      </div>
+      <ul class="list" id="list"></ul>
+    </section>
+    <section class="panel detail" id="detail" aria-label="Detalle de la llamada"></section>
   </div>
-</nav>
-
-<div class="search-bar">
-  <input class="search-input" id="searchInput" placeholder="🔍 Buscar por nombre de paciente..." oninput="filterCards()"/>
 </div>
 
-<div class="stats">
-  <div class="stat-card" id="sc-refills"><div class="stat-num" id="s-refills">—</div><div class="stat-label">Refills<br/>Pendientes</div></div>
-  <div class="stat-card" id="sc-mensajes"><div class="stat-num" id="s-mensajes">—</div><div class="stat-label">Mensajes<br/>Pendientes</div></div>
-  <div class="stat-card" id="sc-recetas"><div class="stat-num" id="s-recetas">—</div><div class="stat-label">Recetas<br/>Pendientes</div></div>
-  <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total<br/>Llamadas</div></div>
-</div>
-
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('refills',this)">💊 Refills <span class="tab-badge" id="badge-refills" style="display:none">0</span></button>
-  <button class="tab" onclick="switchTab('recetas',this)">🔍 Recetas <span class="tab-badge" id="badge-recetas" style="display:none">0</span></button>
-  <button class="tab" onclick="switchTab('mensajes',this)">💬 Mensajes <span class="tab-badge" id="badge-mensajes" style="display:none">0</span></button>
-  <button class="tab" onclick="switchTab('historial',this)">📋 Historial</button>
-</div>
-
-<div class="content">
-  <div id="tab-refills"></div>
-  <div id="tab-recetas" style="display:none"></div>
-  <div id="tab-mensajes" style="display:none"></div>
-  <div id="tab-historial" style="display:none"></div>
-</div>
-
-<div class="toast" id="toast"></div>
+<form class="panel login" id="login" hidden>
+  <h1>Sofía RX</h1>
+  <p>Ingrese la clave del dashboard para ver los pendientes de la farmacia.</p>
+  <label class="sr" for="tok">Clave del dashboard</label>
+  <input id="tok" type="password" autocomplete="current-password" placeholder="Clave del dashboard" required>
+  <div class="err" id="loginErr" role="alert"></div>
+  <button class="btn primary" type="submit">Entrar</button>
+</form>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-let prevCounts = {refills:-1, mensajes:-1, recetas:-1};
-let countdown = 20;
-let timer;
+(function () {
+  'use strict';
 
-function startTimer() {
-  clearInterval(timer);
-  countdown = 20;
-  timer = setInterval(() => {
-    countdown--;
-    document.getElementById('countdown').textContent = countdown + 's';
-    if (countdown <= 0) loadAll();
-  }, 1000);
-}
+  /* ------------------------------------------------------------------
+     CONFIGURACIÓN
+     La URL del backend se define en config.js (apiBase). Vacío = mismo dominio.
+     ------------------------------------------------------------------ */
+  var cfg = window.SOFIA_CONFIG || {};
+  var API_BASE = String(cfg.apiBase || '').trim().replace(/\/+$/, '');
+  var POLL_MS = 5000;
+  var TOKEN_KEY = 'sofia_dash_token';
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 4000);
-}
+  var CONFIG = { pharmacyName: '', alertTarget: 'el WhatsApp del técnico' };
+  var LABEL_TYPE = { refill: 'Refill', message: 'Mensaje', transfer: 'Transferida' };
+  var LABEL_STATUS = { 'new': 'Nuevo', 'progress': 'En proceso', 'done': 'Listo' };
+  var PILL_STATUS = { 'new': 'st-new', 'progress': 'st-progress', 'done': 'st-done' };
 
-function playSound() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.setValueAtTime(880, ctx.currentTime);
-    o.frequency.setValueAtTime(1100, ctx.currentTime + 0.15);
-    g.gain.setValueAtTime(0.3, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-    o.start(); o.stop(ctx.currentTime + 0.5);
-  } catch(e) {}
-}
+  /* ------------------------------------------------------------------
+     CAPA DE DATOS — API real de Sofía RX
+     ------------------------------------------------------------------ */
+  var token = '';
+  try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { token = ''; }
 
-function switchTab(tab, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  ['refills','recetas','mensajes','historial'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none';
+  var items = [];
+  var listeners = [];
+  var lastSig = '';
+  function emit() { listeners.forEach(function (fn) { fn(); }); }
+
+  function request(path, opts) {
+    opts = opts || {};
+    var headers = { 'Authorization': 'Bearer ' + token };
+    if (opts.body) headers['Content-Type'] = 'application/json';
+    return fetch(API_BASE + path, { method: opts.method || 'GET', headers: headers, body: opts.body, cache: 'no-store' });
+  }
+
+  var DataSource = {
+    list: function () { return items.slice(); },
+    /** Devuelve una promesa con { ok, auth, fresh } */
+    refresh: function () {
+      return request('/api/pendientes').then(function (res) {
+        if (res.status === 401) return { ok: false, auth: false };
+        if (!res.ok) return { ok: false, auth: true };
+        return res.json().then(function (data) {
+          var next = data.items || [];
+          var known = {};
+          items.forEach(function (i) { known[i.id] = true; });
+          var fresh = items.length || lastSig ? next.filter(function (i) { return !known[i.id]; }) : [];
+          if (data.pharmacyName) CONFIG.pharmacyName = data.pharmacyName;
+          if (data.alertTarget) CONFIG.alertTarget = data.alertTarget;
+          var sig = JSON.stringify(next);
+          var changed = sig !== lastSig;
+          lastSig = sig;
+          if (changed) { items = next; emit(); }
+          return { ok: true, auth: true, fresh: fresh };
+        });
+      }, function () { return { ok: false, auth: true, network: true }; });
+    },
+    update: function (id, status) {
+      var prev = items;
+      items = items.map(function (it) { return it.id === id ? Object.assign({}, it, { status: status }) : it; });
+      emit();
+      return request('/api/pendientes/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify({ status: status }) })
+        .then(function (res) {
+          if (!res.ok) throw new Error('http ' + res.status);
+          lastSig = JSON.stringify(items);
+        })
+        .catch(function (err) {
+          items = prev;
+          emit();
+          throw err;
+        });
+    },
+    subscribe: function (fn) { listeners.push(fn); }
+  };
+
+  /* ------------------------------------------------------------------
+     ESTADO DE LA INTERFAZ
+     ------------------------------------------------------------------ */
+  var state = { filter: 'all', q: '', hideDone: false, selected: null, freshId: null };
+
+  var elApp = document.getElementById('app');
+  var elLogin = document.getElementById('login');
+  var elTok = document.getElementById('tok');
+  var elLoginErr = document.getElementById('loginErr');
+  var elKpis = document.getElementById('kpis');
+  var elTabs = document.getElementById('tabs');
+  var elList = document.getElementById('list');
+  var elDetail = document.getElementById('detail');
+  var elQ = document.getElementById('q');
+  var elHide = document.getElementById('hideDone');
+  var elClock = document.getElementById('clock');
+  var elToast = document.getElementById('toast');
+  var elConn = document.getElementById('conn');
+  var elConnText = document.getElementById('connText');
+  var toastTimer = null;
+  var pollTimer = null;
+
+  /* ------------------------------------------------------------------
+     UTILIDADES
+     ------------------------------------------------------------------ */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fmtAgo(ts) {
+    var mins = Math.max(0, Math.floor((Date.now() - ts) / 60000));
+    if (mins < 1) return 'ahora';
+    if (mins < 60) return 'hace ' + mins + ' min';
+    var h = Math.floor(mins / 60), m = mins % 60;
+    if (h >= 24) return 'hace ' + Math.floor(h / 24) + ' d';
+    return 'hace ' + h + ' h' + (m ? ' ' + m + ' min' : '');
+  }
+  function fmtTime(ts) {
+    return new Date(ts).toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit' });
+  }
+  function isToday(ts) { return new Date(ts).toDateString() === new Date().toDateString(); }
+  function icon(name, size) {
+    var s = size || 18;
+    var p = {
+      refill: '<polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>',
+      message: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
+      transfer: '<polyline points="19 1 23 5 19 9"></polyline><line x1="15" y1="5" x2="23" y2="5"></line><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>',
+      check: '<polyline points="20 6 9 17 4 12"></polyline>',
+      copy: '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>',
+      chat: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>'
+    }[name] || '';
+    return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  }
+  function showToast(text) {
+    elToast.textContent = text;
+    elToast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { elToast.classList.remove('show'); }, 2600);
+  }
+  function summaryLine(it) {
+    if (it.type === 'refill') return [it.med, it.pickup, it.rx ? 'Receta ' + it.rx : ''].filter(Boolean).join(' · ') || 'Refill';
+    if (it.type === 'transfer') return 'Pasada al recetario' + (it.duration ? ' · ' + it.duration : '');
+    return it.msg || 'Mensaje';
+  }
+
+  /* ------------------------------------------------------------------
+     CONSULTAS
+     ------------------------------------------------------------------ */
+  function matchesQuery(it, q) {
+    if (!q) return true;
+    var hay = [it.name, it.phone, it.rx, it.med, it.msg].join(' ').toLowerCase();
+    return hay.indexOf(q.toLowerCase()) !== -1;
+  }
+  function visibleItems() {
+    return DataSource.list().filter(function (it) {
+      if (state.filter !== 'all' && it.type !== state.filter) return false;
+      if (state.hideDone && it.status === 'done') return false;
+      return matchesQuery(it, state.q);
+    }).sort(function (a, b) {
+      var ad = a.status === 'done' ? 1 : 0, bd = b.status === 'done' ? 1 : 0;
+      if (ad !== bd) return ad - bd;
+      if (!!a.urgent !== !!b.urgent) return a.urgent ? -1 : 1;
+      return b.createdAt - a.createdAt;
+    });
+  }
+  function counts() {
+    var all = DataSource.list();
+    var today = all.filter(function (i) { return isToday(i.createdAt); });
+    return {
+      all: all.length,
+      refill: all.filter(function (i) { return i.type === 'refill'; }).length,
+      message: all.filter(function (i) { return i.type === 'message'; }).length,
+      transfer: all.filter(function (i) { return i.type === 'transfer'; }).length,
+      pending: all.filter(function (i) { return i.status !== 'done'; }).length,
+      refillsToday: today.filter(function (i) { return i.type === 'refill'; }).length,
+      unread: all.filter(function (i) { return i.type === 'message' && i.status === 'new'; }).length,
+      transfersToday: today.filter(function (i) { return i.type === 'transfer'; }).length
+    };
+  }
+
+  /* ------------------------------------------------------------------
+     RENDER
+     ------------------------------------------------------------------ */
+  function renderKpis() {
+    var c = counts();
+    elKpis.innerHTML =
+      '<div class="kpi strong"><span class="label">Pendientes</span><span class="num">' + c.pending + '</span><span class="hint">por atender ahora</span></div>' +
+      '<div class="kpi"><span class="label">Refills de hoy</span><span class="num">' + c.refillsToday + '</span><span class="hint">pedidos recibidos</span></div>' +
+      '<div class="kpi"><span class="label">Mensajes sin leer</span><span class="num">' + c.unread + '</span><span class="hint">esperan respuesta</span></div>' +
+      '<div class="kpi"><span class="label">Pasadas al farmacéutico</span><span class="num">' + c.transfersToday + '</span><span class="hint">hoy</span></div>';
+  }
+
+  function renderTabs() {
+    var c = counts();
+    var defs = [['all', 'Todos'], ['refill', 'Refills'], ['message', 'Mensajes'], ['transfer', 'Transferidas']];
+    elTabs.innerHTML = defs.map(function (d) {
+      return '<button class="tab" type="button" data-filter="' + d[0] + '" aria-pressed="' + (state.filter === d[0]) + '">' + d[1] + '<span class="n">' + c[d[0]] + '</span></button>';
+    }).join('');
+  }
+
+  function renderList() {
+    var rows = visibleItems();
+    if (!rows.length) {
+      elList.innerHTML = '<li class="empty">' + (DataSource.list().length ? 'No hay llamadas con estos filtros.' : 'Todavía no hay llamadas. Cuando Sofía atienda una, aparecerá aquí.') + '</li>';
+      return;
+    }
+    elList.innerHTML = rows.map(function (it) {
+      var cur = it.id === state.selected;
+      return '<li><button class="row' + (it.id === state.freshId ? ' fresh' : '') + '" type="button" data-id="' + esc(it.id) + '" aria-current="' + cur + '">' +
+        '<span class="ico">' + icon(it.type) + '</span>' +
+        '<span class="main"><span class="line1"><strong>' + esc(it.name || 'Paciente') + '</strong>' +
+        '<span class="pill ' + (PILL_STATUS[it.status] || '') + '">' + esc(LABEL_STATUS[it.status] || it.status) + '</span>' +
+        (it.urgent && it.status !== 'done' ? '<span class="pill st-urgent">Urgente</span>' : '') +
+        '</span><span class="line2">' + esc(summaryLine(it)) + '</span></span>' +
+        '<span class="time">' + fmtAgo(it.createdAt) + '</span></button></li>';
+    }).join('');
+  }
+
+  function fact(label, value) {
+    return '<div><dt>' + label + '</dt><dd>' + esc(value || '—') + '</dd></div>';
+  }
+
+  function renderDetail() {
+    var it = DataSource.list().filter(function (i) { return i.id === state.selected; })[0];
+    if (!it) {
+      elDetail.innerHTML = '<div class="empty">Seleccione una llamada de la lista para ver el detalle.</div>';
+      return;
+    }
+    var facts = '';
+    if (it.type === 'refill') {
+      facts = fact('Medicamento', it.med) + fact('Recogido', it.pickup) + (it.rx ? fact('Receta', it.rx) : '');
+    } else if (it.type === 'transfer') {
+      facts = fact('Motivo', it.msg) + fact('Duración', it.duration);
+    } else {
+      facts = fact('Mensaje', it.msg) + (it.rx || it.med ? fact('Receta', [it.med, it.rx].filter(Boolean).join(' · ')) : '');
+    }
+    var chat = (it.transcript || []).map(function (l) {
+      var sofia = l[0] === 'S';
+      return '<div class="msg ' + (sofia ? 'sofia' : 'pac') + '"><span class="who">' + (sofia ? 'Sofía' : 'Paciente') + '</span>' + esc(l[1]) + '</div>';
+    }).join('') || '<p class="d-summary" style="color:var(--muted)">La conversación aparece cuando termina la llamada.</p>';
+    var actions = '';
+    if (it.status === 'new') {
+      actions = '<button class="btn primary" type="button" data-act="progress">Tomar este pendiente</button>';
+    } else if (it.status === 'progress') {
+      actions = '<button class="btn primary" type="button" data-act="done">' + icon('check', 16) + 'Marcar como listo</button><button class="btn" type="button" data-act="new">Devolver a nuevo</button>';
+    } else {
+      actions = '<button class="btn" type="button" data-act="new">Reabrir</button>';
+    }
+    var alertLine = it.alertSentAt
+      ? 'Alerta enviada a ' + esc(CONFIG.alertTarget) + ' a las ' + fmtTime(it.alertSentAt)
+      : 'No se envió alerta de WhatsApp para este pendiente';
+    elDetail.innerHTML =
+      '<div class="d-head"><h2>' + esc(it.name || 'Paciente') + '</h2>' +
+      '<div class="d-phone"><b id="phone">' + esc(it.phone || 'Sin número') + '</b>' +
+      (it.phone ? '<button class="btn small" type="button" data-act="copy">' + icon('copy', 15) + 'Copiar número</button>' : '') + '</div>' +
+      '<div class="pills"><span class="pill st-type">' + esc(LABEL_TYPE[it.type] || it.type) + '</span><span class="pill ' + (PILL_STATUS[it.status] || '') + '">' + esc(LABEL_STATUS[it.status] || it.status) + '</span>' +
+      (it.urgent && it.status !== 'done' ? '<span class="pill st-urgent">Urgente</span>' : '') + '</div></div>' +
+      '<dl class="facts">' + facts + '</dl>' +
+      (it.summary ? '<div><h3 class="sec-title">Resumen de Sofía</h3><p class="d-summary">' + esc(it.summary) + '</p></div>' : '') +
+      '<div><h3 class="sec-title">Conversación</h3><div class="chat">' + chat + '</div></div>' +
+      '<div class="alert">' + icon('chat', 18) + '<span>' + alertLine + '</span></div>' +
+      '<div class="actions">' + actions + '</div>';
+  }
+
+  function renderAll() {
+    if (!state.selected && items.length) state.selected = visibleItems()[0] ? visibleItems()[0].id : items[0].id;
+    document.getElementById('pharmacy').textContent = 'Dashboard del técnico' + (CONFIG.pharmacyName ? ' · ' + CONFIG.pharmacyName : '');
+    renderKpis();
+    renderTabs();
+    renderList();
+    renderDetail();
+  }
+
+  /* ------------------------------------------------------------------
+     CONEXIÓN, LOGIN Y POLLING
+     ------------------------------------------------------------------ */
+  function setConn(ok) {
+    elConn.classList.toggle('off', !ok);
+    elConnText.textContent = ok ? 'Sofía activa' : 'Sin conexión';
+  }
+  function showLogin(msg) {
+    clearInterval(pollTimer);
+    elApp.hidden = true;
+    elLogin.hidden = false;
+    elLoginErr.textContent = msg || '';
+    elTok.focus();
+  }
+  function showApp() {
+    elLogin.hidden = true;
+    elApp.hidden = false;
+  }
+  var wasOnline = true;
+  function poll(first) {
+    return DataSource.refresh().then(function (r) {
+      if (!r.auth) {
+        token = '';
+        try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) { /* sin almacenamiento */ }
+        showLogin(first ? 'Clave incorrecta.' : 'La sesión venció. Ingrese la clave de nuevo.');
+        return false;
+      }
+      setConn(r.ok);
+      if (r.ok) {
+        showApp();
+        if (first) renderAll();
+        if (r.fresh && r.fresh.length) {
+          var f = r.fresh.slice().sort(function (a, b) { return b.createdAt - a.createdAt; })[0];
+          state.freshId = f.id;
+          renderList();
+          showToast('Nueva llamada atendida por Sofía: ' + (f.name || 'paciente'));
+        }
+      } else if (wasOnline) {
+        showToast('No se pudo conectar con Sofía. Reintentando…');
+      }
+      wasOnline = r.ok;
+      return true;
+    });
+  }
+  function start() {
+    clearInterval(pollTimer);
+    poll(true).then(function (ok) {
+      if (ok) pollTimer = setInterval(function () { poll(false); }, POLL_MS);
+    });
+  }
+
+  elLogin.addEventListener('submit', function (e) {
+    e.preventDefault();
+    token = elTok.value.trim();
+    if (!token) return;
+    try { sessionStorage.setItem(TOKEN_KEY, token); } catch (err) { /* sin almacenamiento */ }
+    elTok.value = '';
+    elLoginErr.textContent = '';
+    start();
   });
-}
-
-function timeSince(ts) {
-  const m = Math.floor((Date.now() - ts) / 60000);
-  if (m < 1) return 'Ahora mismo';
-  if (m < 60) return m + ' min';
-  return Math.floor(m/60) + 'h ' + (m%60) + 'm';
-}
-
-function timerBadge(ts) {
-  const m = Math.floor((Date.now() - ts) / 60000);
-  const cls = m > 30 ? 'very-late' : m > 10 ? 'late' : '';
-  return `<span class="badge timer ${cls}">⏱ ${timeSince(ts)}</span>`;
-}
-
-function filterCards() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  document.querySelectorAll('.card').forEach(c => {
-    c.style.display = (c.dataset.name||'').includes(q) ? '' : 'none';
+  document.getElementById('logout').addEventListener('click', function () {
+    token = '';
+    items = [];
+    lastSig = '';
+    state.selected = null;
+    try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) { /* sin almacenamiento */ }
+    showLogin('');
   });
-}
 
-async function completar(tipo, id, btn) {
-  const ni = document.getElementById('n-'+tipo+'-'+id);
-  btn.disabled = true; btn.textContent = '...';
-  try {
-    await fetch('/api/completar/'+tipo+'/'+id, {method:'POST'});
-    btn.textContent = '✓ Listo';
-    btn.style.background = '#10B981';
-    showToast('✅ Completado exitosamente');
-    setTimeout(loadAll, 800);
-  } catch(e) { btn.disabled = false; btn.textContent = 'Completar en RX30'; }
-}
+  /* ------------------------------------------------------------------
+     EVENTOS DE LA INTERFAZ
+     ------------------------------------------------------------------ */
+  elList.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-id]');
+    if (!btn) return;
+    state.selected = btn.getAttribute('data-id');
+    state.freshId = null;
+    renderList();
+    renderDetail();
+    var again = elList.querySelector('[data-id="' + state.selected + '"]');
+    if (again) again.focus();
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      elDetail.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }
+  });
 
-function card(item, tipo) {
-  const done = item.estado === 'completado';
-  const urg = item.urgencia === 'URGENTE';
-  const icons = {refill:'💊',verificacion:'🔍',mensaje:'💬',farmaceutico:'👨‍⚕️'};
-  const t = item.tipo || tipo;
-  return `<div class="card ${urg&&!done?'urgente-card':''}" data-name="${(item.nombre_paciente||'').toLowerCase()}">
-    <div class="card-top">
-      <div class="card-icon ${t}">${icons[t]||'📞'}</div>
-      <div class="card-main">
-        <div class="patient-name">${item.nombre_paciente||'Sin nombre'}</div>
-        <div class="badges">
-          ${done?'<span class="badge completado">✓ COMPLETADO</span>':urg?'<span class="badge urgente">🚨 URGENTE</span>':'<span class="badge pendiente">PENDIENTE</span>'}
-          ${!done&&item.ts_raw?timerBadge(item.ts_raw):''}
-        </div>
-        <div class="card-detail">
-          ${item.fecha_nacimiento?`<strong>Fecha nac.:</strong> ${item.fecha_nacimiento}<br/>`:''}
-          ${item.medicamento?`<strong>Medicamento:</strong> ${item.medicamento}<br/>`:''}
-          ${item.cantidad?`<strong>Cantidad:</strong> ${item.cantidad}<br/>`:''}
-          ${item.mensaje?`<strong>Mensaje:</strong> ${item.mensaje}<br/>`:''}
-          ${item.motivo?`<strong>Motivo:</strong> ${item.motivo}<br/>`:''}
-          ${item.telefono?`<strong>Tel:</strong> <a href="tel:${item.telefono}" style="color:var(--teal);font-weight:600">${item.telefono}</a><br/>`:''}
-        </div>
-        <div class="card-time">⏰ ${item.timestamp}${done&&item.completado_en?' · Completado '+item.completado_en:''}</div>
-      </div>
-    </div>
-    ${!done?`<div class="card-actions">
-      <input class="notes-input" id="n-${t}-${item.id}" placeholder="Notas para RX30 (opcional)"/>
-      <button class="complete-btn" onclick="completar('${t}',${item.id},this)">✓ Completar en RX30</button>
-    </div>`:''}
-  </div>`;
-}
+  elTabs.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-filter]');
+    if (!btn) return;
+    state.filter = btn.getAttribute('data-filter');
+    renderTabs();
+    renderList();
+    var again = elTabs.querySelector('[data-filter="' + state.filter + '"]');
+    if (again) again.focus();
+  });
 
-function historial(items) {
-  if(!items.length) return '<div class="empty"><div class="empty-icon">📋</div><h3>Sin historial</h3></div>';
-  const ic={refill:'💊',verificacion:'🔍',mensaje:'💬',farmaceutico:'👨‍⚕️'};
-  const bg={refill:'#D1FAE5',verificacion:'#DBEAFE',mensaje:'#FEF3C7',farmaceutico:'#FEE2E2'};
-  return `<div class="hist-list">${items.map(i=>`
-    <div class="hist-item">
-      <div class="hist-icon" style="background:${bg[i.tipo]||'#F1F5F9'}">${ic[i.tipo]||'📞'}</div>
-      <div class="hist-text">
-        <div class="hist-name">${i.nombre_paciente||'Desconocido'}</div>
-        <div class="hist-sub">${i.tipo==='refill'?i.medicamento:i.tipo==='verificacion'?'Receta: '+i.medicamento:i.tipo==='farmaceutico'?i.motivo:i.mensaje||''}</div>
-      </div>
-      <div class="hist-right">
-        <div class="hist-time">${i.timestamp}</div>
-        <span class="badge ${i.estado==='completado'?'completado':'pendiente'}" style="font-size:9px;margin-top:4px;display:inline-block">${i.estado.toUpperCase()}</span>
-      </div>
-    </div>`).join('')}</div>`;
-}
+  elQ.addEventListener('input', function () {
+    state.q = elQ.value.trim();
+    renderList();
+  });
 
-function empty(title, sub) {
-  return `<div class="empty"><div class="empty-icon">✅</div><h3>${title}</h3><p>${sub}</p></div>`;
-}
+  elHide.addEventListener('click', function () {
+    state.hideDone = !state.hideDone;
+    elHide.setAttribute('aria-pressed', String(state.hideDone));
+    renderList();
+  });
 
-function section(label, cls, items, tipo) {
-  if (!items.length) return '';
-  return `<div class="section-hdr ${cls}">${label} (${items.length})</div>` + items.map(i=>card(i,tipo)).join('');
-}
+  elDetail.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    var act = btn.getAttribute('data-act');
+    if (act === 'copy') {
+      var phone = document.getElementById('phone');
+      var text = phone ? phone.textContent : '';
+      var fallback = function () {
+        if (!phone) return;
+        var r = document.createRange();
+        r.selectNodeContents(phone);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+        showToast('Número seleccionado, cópielo con Ctrl+C');
+      };
+      try {
+        navigator.clipboard.writeText(text).then(function () { showToast('Número copiado'); }, fallback);
+      } catch (err) { fallback(); }
+      return;
+    }
+    var messages = { progress: 'Pendiente tomado', done: 'Pendiente marcado como listo', 'new': 'Pendiente devuelto a nuevo' };
+    var id = state.selected;
+    DataSource.update(id, act).then(function () {
+      showToast(messages[act]);
+    }, function () {
+      showToast('No se pudo guardar el cambio. Intente de nuevo.');
+    });
+    var next = elDetail.querySelector('[data-act]');
+    if (next) next.focus();
+  });
 
-async function loadAll() {
-  startTimer();
-  try {
-    const [stats,refills,recetas,mensajes,llamadas] = await Promise.all([
-      fetch('/api/stats').then(r=>r.json()),
-      fetch('/api/refills').then(r=>r.json()),
-      fetch('/api/recetas').then(r=>r.json()),
-      fetch('/api/mensajes').then(r=>r.json()),
-      fetch('/api/llamadas').then(r=>r.json()),
-    ]);
+  DataSource.subscribe(renderAll);
 
-    document.getElementById('s-refills').textContent = stats.refills_pend;
-    document.getElementById('s-mensajes').textContent = stats.mensajes_pend;
-    document.getElementById('s-recetas').textContent = stats.recetas_pend;
-    document.getElementById('s-total').textContent = stats.total_llamadas;
+  function tick() {
+    elClock.textContent = new Date().toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit' });
+  }
+  setInterval(function () { tick(); if (!elApp.hidden) renderList(); }, 30000);
+  tick();
 
-    document.getElementById('sc-refills').className = 'stat-card'+(stats.refills_pend>0?' urgent':'');
-    document.getElementById('sc-mensajes').className = 'stat-card'+(stats.mensajes_pend>0?' urgent':'');
-    document.getElementById('sc-recetas').className = 'stat-card'+(stats.recetas_pend>0?' urgent':'');
-
-    const badge = (id, n) => { const b=document.getElementById('badge-'+id); b.style.display=n>0?'inline-flex':'none'; b.textContent=n; };
-    badge('refills', stats.refills_pend);
-    badge('mensajes', stats.mensajes_pend);
-    badge('recetas', stats.recetas_pend);
-
-    if (prevCounts.refills >= 0 && stats.refills_pend > prevCounts.refills) { playSound(); showToast('🔔 Nuevo refill recibido'); }
-    if (prevCounts.mensajes >= 0 && stats.mensajes_pend > prevCounts.mensajes) { playSound(); showToast('💬 Nuevo mensaje recibido'); }
-    prevCounts = {refills:stats.refills_pend, mensajes:stats.mensajes_pend, recetas:stats.recetas_pend};
-
-    const pr = refills.filter(r=>r.estado==='pendiente'), cr = refills.filter(r=>r.estado==='completado');
-    document.getElementById('tab-refills').innerHTML = refills.length ?
-      section('⏳ PENDIENTES','pendiente',pr,'refill') + section('✅ COMPLETADOS','completado',cr,'refill') :
-      empty('Sin refills','Los refills de Sofía aparecerán aquí.');
-
-    const prec = recetas.filter(r=>r.estado==='pendiente'), crec = recetas.filter(r=>r.estado==='completado');
-    document.getElementById('tab-recetas').innerHTML = recetas.length ?
-      section('⏳ PENDIENTES','pendiente',prec,'verificacion') + section('✅ COMPLETADOS','completado',crec,'verificacion') :
-      empty('Sin verificaciones','Las solicitudes aparecerán aquí.');
-
-    const pm = mensajes.filter(m=>m.estado==='pendiente'), cm = mensajes.filter(m=>m.estado==='completado');
-    document.getElementById('tab-mensajes').innerHTML = mensajes.length ?
-      section('⏳ PENDIENTES','pendiente',pm,'mensaje') + section('✅ COMPLETADOS','completado',cm,'mensaje') :
-      empty('Sin mensajes','Los mensajes aparecerán aquí.');
-
-    document.getElementById('tab-historial').innerHTML = historial(llamadas.slice(0,50));
-    filterCards();
-  } catch(e) { console.error(e); }
-}
-
-loadAll();
+  if (token) start(); else showLogin('');
+})();
 </script>
+
 </body>
 </html>
